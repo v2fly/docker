@@ -1,0 +1,71 @@
+name: '[docker] CI for releases'
+
+on:
+    push:
+        tags:
+        - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+        -
+            name: Checkout
+            uses: actions/checkout@v2
+            
+        -
+            name: Get Tag
+            uses: olegtarasov/get-tag@j1
+            id: tagName
+
+        -
+            name: Get the version
+            id: get_tag
+            run: echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
+          
+        - 
+            name: Set up Go 1.13.x
+            uses: actions/setup-go@v1
+            with:
+                go-version: 1.13.x
+
+        -
+            name: Checkout and crossbuild
+            env:
+                TAG: ${{ steps.tagName.outputs.tag }}
+            run: |
+               REPO=$(pwd)
+               export GOPATH=$REPO/go
+               mkdir -p $GOPATH/src/v2ray.com/core
+               pushd $GOPATH/src/v2ray.com/core
+               git clone --progress https://github.com/v2fly/v2ray-core.git .
+               git checkout -b release_tag ${TAG}
+               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-armv7 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
+
+        -
+            name: Dockerhub login
+            env:
+                DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+                DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+            run: |
+                echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin
+        -
+            name: Set up Docker Buildx
+            id: buildx
+            uses: crazy-max/ghaction-docker-buildx@v1
+            with:
+                version: latest
+        -
+            name: Build dockerfile (with push)
+            env:
+                DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+                TAG: ${{ steps.tagName.outputs.tag }}
+            run: |
+                docker buildx build \
+                --platform=linux/amd64,linux/arm/v7,linux/arm64 \
+                --output "type=image,push=true" \
+                --file ./Dockerfile.X . \
+                --tag $(echo "${DOCKER_USERNAME}" | tr '[:upper:]' '[:lower:]')/v2fly-core:${TAG}
+
