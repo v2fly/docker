@@ -25,6 +25,7 @@ jobs:
             name: Checkout v2fly
             run: |
                REPO=$(pwd)
+               export GOPATH=$REPO/go
                mkdir -p $GOPATH/src/v2ray.com/core
                pushd $GOPATH/src/v2ray.com/core
                git clone --progress https://github.com/v2fly/v2ray-core.git .
