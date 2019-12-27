@@ -54,14 +54,21 @@ build_v2() {
 
 build_dat() {
 	echo ">>> Downloading newest geoip ..."
-	wget -qO - https://api.github.com/repos/v2ray/geoip/releases/latest \
-	| grep browser_download_url | cut -d '"' -f 4 \
-	| wget -i - -O $TMP/geoip.dat
+	CACHE=$__dir
+	if [[ ! -f $CACHE/geoip.dat ]]; then
+		wget -qO - https://api.github.com/repos/v2ray/geoip/releases/latest \
+		| grep browser_download_url | cut -d '"' -f 4 \
+		| wget -i - -O $CACHE/geoip.dat
+	fi
 
-	echo ">>> Downloading newest geosite ..."
-	wget -qO - https://api.github.com/repos/v2ray/domain-list-community/releases/latest \
-	| grep browser_download_url | cut -d '"' -f 4 \
-	| wget -i - -O $TMP/geosite.dat
+	if [[ ! -f $CACHE/geosite.dat ]]; then
+		echo ">>> Downloading newest geosite ..."
+		wget -qO - https://api.github.com/repos/v2ray/domain-list-community/releases/latest \
+		| grep browser_download_url | cut -d '"' -f 4 \
+		| wget -i - -O $CACHE/geosite.dat
+	fi
+
+	cp -v $CACHE/{geoip.dat,geosite.dat} $TMP
 }
 
 copyconf() {
