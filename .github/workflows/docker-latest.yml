@@ -1,4 +1,4 @@
-name: '[docker] CI for releases'
+name: '[docker] CI for docker/latest'
 
 on:
     push:
