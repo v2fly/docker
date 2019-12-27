@@ -2,6 +2,16 @@ FROM alpine
 
 LABEL maintainer "V2Fly Community <admin@v2fly.org>"
 
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+ARG BUILDPLATFORM
+ARG BUILDOS
+ARG BUILDARCH
+ARG BUILDVARIANT
+
 RUN echo "Image target platform details :: "
 RUN echo "TARGETPLATFORM    : $TARGETPLATFORM"
 RUN echo "TARGETOS          : $TARGETOS"
@@ -15,7 +25,7 @@ RUN echo "BUILDARCH         : $BUILDARCH"
 RUN echo "BUILDVARIANT      : $BUILDVARIANT"
 
 
-COPY v2ray-$TARGETARCH.tgz /tmp/v2ray.tgz
+COPY v2ray-${TARGETARCH}.tgz /tmp/v2ray.tgz
 RUN apk update && apk add ca-certificates && \
     mkdir -p /usr/bin/v2ray && \
     tar xvfz /tmp/v2ray.tgz -C /usr/bin/v2ray
