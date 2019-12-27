@@ -12,16 +12,10 @@ jobs:
         -
             name: Checkout
             uses: actions/checkout@v2
-            
-        -
-            name: Get Tag
-            uses: olegtarasov/get-tag@j1
-            id: tagName
 
         -
-            name: Get the version
-            id: get_tag
-            run: echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
+            name: Set env
+            run: echo ::set-env name=TAG::$(echo ${GITHUB_REF:10})
           
         - 
             name: Set up Go 1.13.x
@@ -31,8 +25,6 @@ jobs:
 
         -
             name: Checkout and crossbuild
-            env:
-                TAG: ${{ steps.tagName.outputs.tag }}
             run: |
                REPO=$(pwd)
                export GOPATH=$REPO/go
@@ -61,7 +53,6 @@ jobs:
             name: Build dockerfile (with push)
             env:
                 DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-                TAG: ${{ steps.tagName.outputs.tag }}
             run: |
                 docker buildx build \
                 --platform=linux/amd64,linux/arm/v7,linux/arm64 \
