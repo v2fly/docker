@@ -22,17 +22,16 @@ jobs:
                 go-version: 1.13.x
 
         -
-            name: Checkout v2fly
+            name: Checkout and crossbuild
             run: |
                REPO=$(pwd)
                export GOPATH=$REPO/go
                mkdir -p $GOPATH/src/v2ray.com/core
                pushd $GOPATH/src/v2ray.com/core
                git clone --progress https://github.com/v2fly/v2ray-core.git .
-
                bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64v8.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-amd64 arm7 abpathtgz=$REPO/v2ray-arm32v7.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-amd64 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
 
         -
             name: Dockerhub login
