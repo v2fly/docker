@@ -17,9 +17,11 @@ __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on
 
 NOW=$(date '+%Y%m%d-%H%M%S')
 TMP=$(mktemp -d)
+SRCDIR=$(pwd)
 
 CODENAME="user"
 BUILDNAME=$NOW
+VERSIONTAG=$(git describe --tags)
 GOPATH=$(go env GOPATH)
 
 cleanup () { rm -rf $TMP; }
@@ -28,52 +30,47 @@ trap cleanup INT TERM ERR
 get_source() {
 	echo ">>> Getting v2ray sources ..."
 	go get -insecure -v -t v2ray.com/core/...
+	SRCDIR="$GOPATH/src/v2ray.com/core"
 }
 
 build_v2() {
-	pushd $GOPATH/src/v2ray.com/core
-	echo ">>> Update source code name ..."
-	sed -i "s/^[ \t]\+codename.\+$/\tcodename = \"${CODENAME}\"/;s/^[ \t]\+build.\+$/\tbuild = \"${BUILDNAME}\"/;" core.go
+	pushd $SRCDIR
+	LDFLAGS="-s -w -X v2ray.com/core.codename=${CODENAME} -X v2ray.com/core.build=${BUILDNAME}  -X v2ray.com/core.version=${VERSIONTAG}"
 
 	echo ">>> Compile v2ray ..."
-	pushd $GOPATH/src/v2ray.com/core/main
-	env CGO_ENABLED=0 go build -o $TMP/v2ray${EXESUFFIX} -ldflags "-s -w"
+	env CGO_ENABLED=0 go build -o $TMP/v2ray${EXESUFFIX} -ldflags "$LDFLAGS" ./main
 	if [[ $GOOS == "windows" ]];then
-	  env CGO_ENABLED=0 go build -o $TMP/wv2ray${EXESUFFIX} -ldflags "-s -w -H windowsgui"
+	  env CGO_ENABLED=0 go build -o $TMP/wv2ray${EXESUFFIX} -ldflags "-H windowsgui $LDFLAGS" ./main
 	fi
-	popd
-
-	git checkout -- core.go
-	popd
 
 	echo ">>> Compile v2ctl ..."
-	pushd $GOPATH/src/v2ray.com/core/infra/control/main
-	env CGO_ENABLED=0 go build -o $TMP/v2ctl${EXESUFFIX} -tags confonly -ldflags "-s -w"
+	env CGO_ENABLED=0 go build -o $TMP/v2ctl${EXESUFFIX} -tags confonly -ldflags "$LDFLAGS" ./infra/control/main
 	popd
 }
 
 build_dat() {
-	echo ">>> Downloading newest geoip ..."
-	CACHE=$__dir
-	if [[ ! -f $CACHE/geoip.dat ]]; then
-		wget -qO - https://api.github.com/repos/v2ray/geoip/releases/latest \
-		| grep browser_download_url | cut -d '"' -f 4 \
-		| wget -i - -O $CACHE/geoip.dat
-	fi
+        echo ">>> Downloading newest geoip ..."
 
-	if [[ ! -f $CACHE/geosite.dat ]]; then
-		echo ">>> Downloading newest geosite ..."
-		wget -qO - https://api.github.com/repos/v2ray/domain-list-community/releases/latest \
-		| grep browser_download_url | cut -d '"' -f 4 \
-		| wget -i - -O $CACHE/geosite.dat
-	fi
+        CACHE=$__dir
+        if [[ ! -f $CACHE/geoip.dat ]]; then
+                wget -qO - https://api.github.com/repos/v2ray/geoip/releases/latest \
+                | grep browser_download_url | cut -d '"' -f 4 \
+                | wget -i - -O $CACHE/geoip.dat
+        fi
 
-	cp -v $CACHE/{geoip.dat,geosite.dat} $TMP
+        if [[ ! -f $CACHE/geosite.dat ]]; then
+                echo ">>> Downloading newest geosite ..."
+                wget -qO - https://api.github.com/repos/v2ray/domain-list-community/releases/latest \
+                | grep browser_download_url | cut -d '"' -f 4 \
+                | wget -i - -O $CACHE/geosite.dat
+        fi
+
+        cp -v $CACHE/{geoip.dat,geosite.dat} $TMP
 }
 
 copyconf() {
 	echo ">>> Copying config..."
-	pushd $GOPATH/src/v2ray.com/core/release/config
+	pushd $SRCDIR/release/config
 	tar c --exclude "*.dat" . | tar x -C $TMP
 }
 
@@ -108,19 +105,18 @@ nodat=0
 noconf=0
 GOOS=linux
 GOARCH=amd64
+GOARM=
 EXESUFFIX=
 PKGSUFFIX=
 
 for arg in "$@"; do
 case $arg in
 	arm64)
-		GOARCH=$arg
+		GOARCH=arm64
 		;;
 	arm7)
+		GOARM=7
 		GOARCH=arm
-		;;
-	arm*)
-		GOARCH=$arg
 		;;
 	mips*)
 		GOARCH=$arg
@@ -166,6 +162,11 @@ fi
 
 export GOOS GOARCH
 echo "Build ARGS: GOOS=${GOOS} GOARCH=${GOARCH} CODENAME=${CODENAME} BUILDNAME=${BUILDNAME}"
+if [[ $GOARCH == "arm" ]]; then
+  echo "Build ARGS: GOARM=${GOARM}"
+  export GOARM
+fi
+
 echo "PKG ARGS: pkg=${pkg}"
 build_v2
 
