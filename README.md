@@ -3,6 +3,7 @@ docker build repo for v2fly
 
 # History
 
+* build 4.22.1
 * Build Latest
 * build 4.22.0
 * use github action, buildx
