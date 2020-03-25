@@ -2,8 +2,8 @@ name: '[docker] CI for docker/tag'
 
 on:
     push:
-        tags:
-        - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+        paths:
+            - 'ReleaseTag'
 
 jobs:
     release:
@@ -15,7 +15,7 @@ jobs:
 
         -
             name: Set env
-            run: echo ::set-env name=TAG::$(echo ${GITHUB_REF:10})
+            run: echo ::set-env name=TAG::$(cat ReleaseTag)
           
         - 
             name: Set up Go 1.13.x

@@ -6,6 +6,7 @@ on:
         paths:
             - 'Dockerfile'
             - 'README.md'
+            - 'ReleaseTag'
 
 jobs:
     release:
