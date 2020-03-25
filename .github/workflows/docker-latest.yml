@@ -30,9 +30,9 @@ jobs:
                mkdir -p $GOPATH/src/v2ray.com/core
                pushd $GOPATH/src/v2ray.com/core
                git clone --progress https://github.com/v2fly/v2ray-core.git .
-               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-armv7 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=$(cat ReleaseTag) buildname=docker-fly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=$(cat ReleaseTag) buildname=docker-fly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=$(cat ReleaseTag) buildname=docker-fly-armv7 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
 
         -
             name: Dockerhub login

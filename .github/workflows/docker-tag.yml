@@ -15,7 +15,9 @@ jobs:
 
         -
             name: Set env
-            run: echo ::set-env name=TAG::$(cat ReleaseTag)
+            run: |
+                echo ::set-env name=GITTAG::$(cat ReleaseTag)
+                echo ::set-env name=GITHASH::$(cat ReleaseHash)
           
         - 
             name: Set up Golang
@@ -31,10 +33,10 @@ jobs:
                mkdir -p $GOPATH/src/v2ray.com/core
                pushd $GOPATH/src/v2ray.com/core
                git clone --progress https://github.com/v2fly/v2ray-core.git .
-               git checkout -b release_tag ${TAG}
-               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly-armv7 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
+               git checkout -b release_tag ${GITHASH}
+               bash $REPO/ci-package.sh nosource noconf codename=${GITTAG} buildname=dockerfly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=${GITTAG} buildname=dockerfly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=${GITTAG} buildname=dockerfly-armv7 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
 
         -
             name: Dockerhub login
