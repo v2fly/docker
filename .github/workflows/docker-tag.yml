@@ -3,6 +3,7 @@ name: '[docker] CI for docker/tag'
 on:
     push:
         paths:
+            - 'README.md'
             - 'ReleaseTag'
 
 jobs:
