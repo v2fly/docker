@@ -13,14 +13,14 @@ __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
-black() { echo -e "$(tput setaf 0)$*$(tput setaf 9)"; }
-red() { echo -e "$(tput setaf 1)$*$(tput setaf 9)"; }
-green() { echo -e "$(tput setaf 2)$*$(tput setaf 9)"; }
-yellow() { echo -e "$(tput setaf 3)$*$(tput setaf 9)"; }
-blue() { echo -e "$(tput setaf 4)$*$(tput setaf 9)"; }
-magenta() { echo -e "$(tput setaf 5)$*$(tput setaf 9)"; }
-cyan() { echo -e "$(tput setaf 6)$*$(tput setaf 9)"; }
-white() { echo -e "$(tput setaf 7)$*$(tput setaf 9)"; }
+black() { echo -e "$(tput -T xterm setaf 0)$*$(tput -T xterm setaf 9)"; }
+red() { echo -e "$(tput -T xterm setaf 1)$*$(tput -T xterm setaf 9)"; }
+green() { echo -e "$(tput -T xterm setaf 2)$*$(tput -T xterm setaf 9)"; }
+yellow() { echo -e "$(tput -T xterm setaf 3)$*$(tput -T xterm setaf 9)"; }
+blue() { echo -e "$(tput -T xterm setaf 4)$*$(tput -T xterm setaf 9)"; }
+magenta() { echo -e "$(tput -T xterm setaf 5)$*$(tput -T xterm setaf 9)"; }
+cyan() { echo -e "$(tput -T xterm setaf 6)$*$(tput -T xterm setaf 9)"; }
+white() { echo -e "$(tput -T xterm setaf 7)$*$(tput -T xterm setaf 9)"; }
 
 NOW=$(date '+%Y%m%d-%H%M%S')
 TMP=$(mktemp -d)
