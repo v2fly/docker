@@ -67,7 +67,7 @@ jobs:
             name: Checkout and crossbuild v2fly:latest
             run: |
                REPO=$(pwd)
-               rm -fv $(REPO)/v2ray-*.tgz
+               rm -fv $REPO/v2ray-*.tgz
                export GOPATH=$REPO/go
                pushd $GOPATH/src/v2ray.com/core
                git fetch
