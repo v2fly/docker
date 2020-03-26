@@ -49,24 +49,31 @@ build_v2() {
 }
 
 build_dat() {
-        echo ">>> Downloading newest geoip ..."
-
         CACHE=$__dir
         if [[ ! -f $CACHE/geoip.dat ]]; then
+                echo ">>> Downloading lastest geoip ..."
+		pushd $CACHE
                 wget -qO - https://api.github.com/repos/v2ray/geoip/releases/latest \
-                | grep browser_download_url | cut -d '"' -f 4 \
-                | wget -i - -O $CACHE/geoip.dat
+                | jq -r '.assets[] | .browser_download_url' \
+                | wget -i -
+                sha256sum -c geoip.dat.sha256sum || exit 1
+		popd
         fi
 
-        if [[ ! -f $CACHE/geosite.dat ]]; then
-                echo ">>> Downloading newest geosite ..."
+        if [[ ! -f $CACHE/dlc.dat ]]; then
+                echo ">>> Downloading latest geosite ..."
+		pushd $CACHE
                 wget -qO - https://api.github.com/repos/v2ray/domain-list-community/releases/latest \
-                | grep browser_download_url | cut -d '"' -f 4 \
-                | wget -i - -O $CACHE/geosite.dat
+                | jq -r '.assets[] | .browser_download_url' \
+                | wget -i -
+                sha256sum -c dlc.dat.sha256sum || exit 1
+		popd
         fi
 
-        cp -v $CACHE/{geoip.dat,geosite.dat} $TMP
+        cp -v $CACHE/geoip.dat $TMP/geoip.dat
+        cp -v $CACHE/dlc.dat $TMP/geosite.dat
 }
+
 
 copyconf() {
 	echo ">>> Copying config..."
