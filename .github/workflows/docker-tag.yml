@@ -49,9 +49,9 @@ jobs:
                pushd $GOPATH/src/v2ray.com/core
                git clone --progress https://github.com/v2fly/v2ray-core.git .
                git checkout -b release_tag ${GITHASH}
-               bash $REPO/ci-package.sh nosource noconf codename=${GITTAG} buildname=dockerfly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=${GITTAG} buildname=dockerfly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=${GITTAG} buildname=dockerfly-armv7 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=${GITTAG} versiontag=${GITTAG} buildname=dockerfly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=${GITTAG} versiontag=${GITTAG} buildname=dockerfly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=${GITTAG} versiontag=${GITTAG} buildname=dockerfly-armv7 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
 
         -
             name: Build v2fly-tag (with docker push)
@@ -73,9 +73,9 @@ jobs:
                git fetch
                git checkout -b release_latest master
                HASH=$(git rev-parse --short HEAD)
-               bash $REPO/ci-package.sh nosource noconf codename=v2fly-${HASH} buildname=dockerfly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=v2fly-${HASH} buildname=dockerfly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
-               bash $REPO/ci-package.sh nosource noconf codename=v2fly-${HASH} buildname=dockerfly-armv7 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=v2fly/${HASH} versiontag=${GITTAG} buildname=dockerfly-amd64 abpathtgz=$REPO/v2ray-amd64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=v2fly/${HASH} versiontag=${GITTAG} buildname=dockerfly-arm64 arm64 abpathtgz=$REPO/v2ray-arm64.tgz 
+               bash $REPO/ci-package.sh nosource noconf codename=v2fly/${HASH} versiontag=${GITTAG} buildname=dockerfly-armv7 arm7 abpathtgz=$REPO/v2ray-armv7.tgz 
 
         -
             name: Build v2fly:latest (with docker push)

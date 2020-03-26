@@ -27,8 +27,8 @@ TMP=$(mktemp -d)
 SRCDIR=$(pwd)
 
 CODENAME="user"
-BUILDNAME=$NOW
-VERSIONTAG=$(cat ReleaseTag)
+BUILDNAME=""
+VERSIONTAG=""
 GOPATH=$(go env GOPATH)
 
 cleanup () { rm -rf $TMP; }
@@ -173,6 +173,9 @@ case $arg in
 	buildname=*)
 		BUILDNAME=${arg##buildname=}
 		;;
+	versiontag=*)
+		VERSIONTAG=${arg##versiontag=}
+		;;
 esac
 done
 
@@ -181,7 +184,7 @@ if [[ $nosource != 1 ]]; then
 fi
 
 export GOOS GOARCH
-green "Build ARGS: GOOS=${GOOS} GOARCH=${GOARCH} CODENAME=${CODENAME} BUILDNAME=${BUILDNAME}"
+green "Build ARGS: GOOS=${GOOS} GOARCH=${GOARCH} CODENAME=${CODENAME} BUILDNAME=${BUILDNAME} VERSIONTAG=${VERSIONTAG}"
 if [[ $GOARCH == "arm" ]]; then
   green "Build ARGS: GOARM=${GOARM}"
   export GOARM
