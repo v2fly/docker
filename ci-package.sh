@@ -13,7 +13,14 @@ __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
-
+black() { echo -e "$(tput setaf 0)$*$(tput setaf 9)"; }
+red() { echo -e "$(tput setaf 1)$*$(tput setaf 9)"; }
+green() { echo -e "$(tput setaf 2)$*$(tput setaf 9)"; }
+yellow() { echo -e "$(tput setaf 3)$*$(tput setaf 9)"; }
+blue() { echo -e "$(tput setaf 4)$*$(tput setaf 9)"; }
+magenta() { echo -e "$(tput setaf 5)$*$(tput setaf 9)"; }
+cyan() { echo -e "$(tput setaf 6)$*$(tput setaf 9)"; }
+white() { echo -e "$(tput setaf 7)$*$(tput setaf 9)"; }
 
 NOW=$(date '+%Y%m%d-%H%M%S')
 TMP=$(mktemp -d)
@@ -21,29 +28,29 @@ SRCDIR=$(pwd)
 
 CODENAME="user"
 BUILDNAME=$NOW
-VERSIONTAG=$(git describe --tags)
+VERSIONTAG=$(cat ReleaseTag)
 GOPATH=$(go env GOPATH)
 
 cleanup () { rm -rf $TMP; }
 trap cleanup INT TERM ERR
 
 get_source() {
-	echo ">>> Getting v2ray sources ..."
+	yellow ">>> Getting v2ray sources ..."
 	go get -insecure -v -t v2ray.com/core/...
 	SRCDIR="$GOPATH/src/v2ray.com/core"
 }
 
 build_v2() {
 	pushd $SRCDIR
-	LDFLAGS="-s -w -X v2ray.com/core.codename=${CODENAME} -X v2ray.com/core.build=${BUILDNAME}  -X v2ray.com/core.version=${VERSIONTAG}"
+	LDFLAGS="-s -w -X v2ray.com/core.codename=${CODENAME} -X v2ray.com/core.build=${BUILDNAME} -X v2ray.com/core.version=${VERSIONTAG}"
 
-	echo ">>> Compile v2ray ..."
+	yellow ">>> Compile v2ray ..."
 	env CGO_ENABLED=0 go build -o $TMP/v2ray${EXESUFFIX} -ldflags "$LDFLAGS" ./main
 	if [[ $GOOS == "windows" ]];then
 	  env CGO_ENABLED=0 go build -o $TMP/wv2ray${EXESUFFIX} -ldflags "-H windowsgui $LDFLAGS" ./main
 	fi
 
-	echo ">>> Compile v2ctl ..."
+	yellow ">>> Compile v2ctl ..."
 	env CGO_ENABLED=0 go build -o $TMP/v2ctl${EXESUFFIX} -tags confonly -ldflags "$LDFLAGS" ./infra/control/main
 	popd
 }
@@ -51,22 +58,28 @@ build_v2() {
 build_dat() {
         CACHE=$__dir
         if [[ ! -f $CACHE/geoip.dat ]]; then
-                echo ">>> Downloading lastest geoip ..."
+                yellow ">>> Downloading lastest geoip ..."
 		pushd $CACHE
                 wget -qO - https://api.github.com/repos/v2ray/geoip/releases/latest \
                 | jq -r '.assets[] | .browser_download_url' \
                 | wget -i -
-                sha256sum -c geoip.dat.sha256sum || exit 1
+                if ! sha256sum -c geoip.dat.sha256sum; then
+		  red "geoip.dat checksum error"
+		  exit 1
+		fi
 		popd
         fi
 
         if [[ ! -f $CACHE/dlc.dat ]]; then
-                echo ">>> Downloading latest geosite ..."
+                yellow ">>> Downloading latest geosite ..."
 		pushd $CACHE
                 wget -qO - https://api.github.com/repos/v2ray/domain-list-community/releases/latest \
                 | jq -r '.assets[] | .browser_download_url' \
                 | wget -i -
-                sha256sum -c dlc.dat.sha256sum || exit 1
+                if ! sha256sum -c dlc.dat.sha256sum; then
+		  red "dlc.dat checksum error"
+		  exit 1
+		fi
 		popd
         fi
 
@@ -76,33 +89,33 @@ build_dat() {
 
 
 copyconf() {
-	echo ">>> Copying config..."
+	yellow ">>> Copying config..."
 	pushd $SRCDIR/release/config
 	tar c --exclude "*.dat" . | tar x -C $TMP
 }
 
 packzip() {
-	echo ">>> Generating zip package"
+	yellow ">>> Generating zip package"
 	pushd $TMP
 	local PKG=${__dir}/v2ray-custom-${GOARCH}-${GOOS}-${PKGSUFFIX}${NOW}.zip
 	zip -r $PKG .
-	echo ">>> Generated: $(basename $PKG)"
+	yellow ">>> Generated: $(basename $PKG)"
 }
 
 packtgz() {
-	echo ">>> Generating tgz package"
+	yellow ">>> Generating tgz package"
 	pushd $TMP
 	local PKG=${__dir}/v2ray-custom-${GOARCH}-${GOOS}-${PKGSUFFIX}${NOW}.tar.gz
 	tar cvfz $PKG .
-	echo ">>> Generated: $(basename $PKG)"
+	yellow ">>> Generated: $(basename $PKG)"
 }
 
 packtgzAbPath() {
 	local ABPATH="$1"
-	echo ">>> Generating tgz package at $ABPATH"
+	yellow ">>> Generating tgz package at $ABPATH"
 	pushd $TMP
 	tar cvfz $ABPATH .
-	echo ">>> Generated: $ABPATH"
+	yellow ">>> Generated: $ABPATH"
 }
 
 
@@ -168,13 +181,13 @@ if [[ $nosource != 1 ]]; then
 fi
 
 export GOOS GOARCH
-echo "Build ARGS: GOOS=${GOOS} GOARCH=${GOARCH} CODENAME=${CODENAME} BUILDNAME=${BUILDNAME}"
+green "Build ARGS: GOOS=${GOOS} GOARCH=${GOARCH} CODENAME=${CODENAME} BUILDNAME=${BUILDNAME}"
 if [[ $GOARCH == "arm" ]]; then
-  echo "Build ARGS: GOARM=${GOARM}"
+  green "Build ARGS: GOARM=${GOARM}"
   export GOARM
 fi
 
-echo "PKG ARGS: pkg=${pkg}"
+green "PKG ARGS: pkg=${pkg}"
 build_v2
 
 if [[ $nodat != 1 ]]; then
