@@ -1,6 +1,6 @@
 FROM alpine
 
-LABEL maintainer "V2Fly Community <admin@v2fly.org>"
+LABEL maintainer "V2Fly Community <vcptr@v2fly.org>"
 
 ARG TARGETPLATFORM
 ARG TARGETOS

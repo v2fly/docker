@@ -11,7 +11,7 @@ RUN git clone --progress https://github.com/v2fly/v2ray-core.git . && \
 ############################
 FROM alpine
 
-LABEL maintainer "V2Fly Community <admin@v2fly.org>"
+LABEL maintainer "V2Fly Community <vcptr@v2fly.org>"
 COPY --from=builder /tmp/v2ray.tgz /tmp
 RUN apk update && apk add ca-certificates && \
     mkdir -p /usr/bin/v2ray && \
