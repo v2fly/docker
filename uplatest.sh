@@ -1,18 +1,6 @@
 #!/bin/bash
 
-COREREPO=$1
-if [[ -z $COREREPO ]]; then
-	COREREPO=../core
-fi
-
-if [[ ! -d $COREREPO ]]; then
-	echo "$0 path/to/core/gitrepo"
-	exit 1
-fi
-
-pushd $COREREPO
-LATESTHASH=$(git rev-parse --short HEAD)
-popd
+LATESTHASH=$(curl --compressed https://api.github.com/repos/v2fly/v2ray-core/commits/master | jq -r .sha)
 CURRHASH=$(cat ReleaseHash)
 
 echo "Prev Rev: ${CURRHASH}, repo Hash: ${LATESTHASH}"

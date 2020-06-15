@@ -1,19 +1,12 @@
 #!/bin/bash
 
-COREREPO=$1
-if [[ -z $COREREPO ]]; then
-	COREREPO=../core
-fi
-
-if [[ ! -d $COREREPO ]]; then
-	echo "$0 path/to/core/gitrepo"
-	exit 1
-fi
-
-pushd $COREREPO
-LATESTTAG=$(git describe --tags)
-popd
+LATESTTAG=$(curl --compressed https://api.github.com/repos/v2fly/v2ray-core/releases/latest | jq -r .tag_name)
 CURRTAG=$(cat ReleaseTag)
+
+if [[ -z $LATESTTAG ]]; then
+  echo "cant retrive latesttag"
+  exit 1
+fi
 
 echo "Prev Rev: ${CURRTAG}, repo Hash: ${LATESTTAG}"
 
