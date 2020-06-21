@@ -39,7 +39,7 @@ jobs:
             id: buildx
             uses: crazy-max/ghaction-docker-buildx@v1
             with:
-                version: latest
+                buildx-version: latest
         -
             name: Checkout and crossbuild v2fly:tag
             run: |
