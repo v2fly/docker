@@ -15,10 +15,10 @@ jobs:
 
       - name: Set env
         run: |
-          echo "::set-env name=GITTAG::$(cat ReleaseTag)"
-          echo "::set-env name=GITHASH::$(cat ReleaseHash)"
-          echo "::set-env name=WORKDIR::$(dirname $GITHUB_WORKSPACE)"
-          echo "::set-env name=GOPATH::$(dirname $GITHUB_WORKSPACE)/go"
+          echo "GITTAG=$(cat ReleaseTag)" >> $GITHUB_ENV
+          echo "GITHASH=$(cat ReleaseHash)" >> $GITHUB_ENV
+          echo "WORKDIR=$(dirname $GITHUB_WORKSPACE)" >> $GITHUB_ENV
+          echo "GOPATH=$(dirname $GITHUB_WORKSPACE)/go" >> $GITHUB_ENV
 
       - name: Setup Golang
         uses: actions/setup-go@v1
