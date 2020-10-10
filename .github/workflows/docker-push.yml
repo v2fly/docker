@@ -69,7 +69,7 @@ jobs:
       - name: Set env
         run: |
           echo "TAG=$(cat ReleaseTag)" >> $GITHUB_ENV
-        shell:bash
+        shell: bash
 
       - name: Test Docker image
         run: |
