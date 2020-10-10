@@ -9,13 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Checkout codebase
+      - name: Checkout
         uses: actions/checkout@v2
+        with:
+          path: master
       
       - name: Set env
         run: |
           echo "WORKDIR=$(dirname $GITHUB_WORKSPACE)" >> $GITHUB_ENV
           echo "TAG=$(cat ReleaseTag)" >> $GITHUB_ENV
+        shell: bash
 
       - name: Install Golang
         uses: actions/setup-go@v2
@@ -58,12 +61,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Checkout codebase
+      - name: Checkout
         uses: actions/checkout@v2
+        with:
+          path: master
       
       - name: Set env
         run: |
           echo "TAG=$(cat ReleaseTag)" >> $GITHUB_ENV
+        shell:bash
 
       - name: Test Docker image
         run: |
