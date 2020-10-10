@@ -2,8 +2,6 @@ on:
   push:
     branches: 
       - 'master'
-    paths:
-      - "ReleaseTag"
 
 name: docker push
 jobs:
