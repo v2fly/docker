@@ -21,9 +21,8 @@ jobs:
           
       - name: Build Target
         run: |
-          cp ${WORKDIR}/DockerHub/* ${PWD}
-          chmod +x v2ray.sh
-          bash v2ray.sh
+          chmod +x ${WORKDIR}/DockerHub/v2ray.sh
+          bash ${WORKDIR}/DockerHub/v2ray.sh
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -42,14 +41,14 @@ jobs:
           docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
           --output "type=image,push=true" \
           --tag "${{ secrets.DOCKER_USERNAME }}/test:latest" \
-          --file Dockerfile .
+          --file ${WORKDIR}/DockerHub/Dockerfile .
        
       - name: Build tag
         run: |
           docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
           --output "type=image,push=true" \
           --tag "${{ secrets.DOCKER_USERNAME }}/test:${{ env.TAG }}" \
-          --file Dockerfile .
+          --file ${WORKDIR}/DockerHub/Dockerfile .
 
   test:
     needs: build
