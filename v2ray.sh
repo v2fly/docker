@@ -2,7 +2,7 @@
 
 # Get code
 CUR=${PWD}
-TAG=$(wget -qO- https://raw.githubusercontent.com/v2fly/docker/master/ReleaseTag | head -n1)
+TAG=$(cat ReleaseTag)
 git clone -b ${TAG} https://github.com/v2fly/v2ray-core.git && cp v2ray-core/release/config/*.dat ${CUR} && cp v2ray-core/release/config/config.json ${CUR}
 cd v2ray-core
 
