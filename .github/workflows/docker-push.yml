@@ -1,20 +1,18 @@
 on:
   push:
     paths:
-      - "README.md"
       - "ReleaseTag"
 
 name: docker push
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      TZ: Asia/Shanghai
     steps:
       
       - name: Set env
         run: |
-          echo "TAG=$(wget -qO- https://api.github.com/repos/v2fly/v2ray-core/tags | grep 'name' | cut -d\" -f4 | head -n1)" >> $GITHUB_ENV
+          echo "WORKDIR=$(dirname $GITHUB_WORKSPACE)" >> $GITHUB_ENV
+          echo "TAG=$(wget -qO- https://raw.githubusercontent.com/v2fly/docker/master/ReleaseTag | head -n1)" >> $GITHUB_ENV
 
       - name: Install Golang
         uses: actions/setup-go@v2
@@ -23,9 +21,9 @@ jobs:
           
       - name: Build Target
         run: |
-          wget -O Dockerfile https://raw.githubusercontent.com/v2fly/docker/master/DockerHub/Dockerfile
-          wget -O v2ray.sh https://raw.githubusercontent.com/v2fly/docker/master/DockerHub/v2ray.sh
-          chmod +x v2ray.sh && bash v2ray.sh
+          cp ${WORKDIR}/DockerHub/* ${PWD}
+          chmod +x v2ray.sh
+          bash v2ray.sh
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -60,7 +58,7 @@ jobs:
       
       - name: Set env
         run: |
-          echo "TAG=$(wget -qO- https://api.github.com/repos/v2fly/v2ray-core/tags | grep 'name' | cut -d\" -f4 | head -n1)" >> $GITHUB_ENV
+          echo "TAG=$(wget -qO- https://raw.githubusercontent.com/v2fly/docker/master/ReleaseTag | head -n1)" >> $GITHUB_ENV
 
       - name: Test Docker image
         run: |
