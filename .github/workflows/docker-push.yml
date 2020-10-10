@@ -24,8 +24,10 @@ jobs:
           
       - name: Build Target
         run: |
-          chmod +x ${WORKDIR}/v2ray.sh
-          bash ${WORKDIR}/v2ray.sh
+          cp ${ env.WORKDIR }/v2ray.sh ${PWD}
+          cp ${ env.WORKDIR }/Dockerfile ${PWD}
+          chmod +x v2ray.sh
+          bash v2ray.sh
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
