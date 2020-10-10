@@ -23,8 +23,8 @@ jobs:
           
       - name: Build Target
         run: |
-          wget -O Dockerfile https://raw.githubusercontent.com/charlieethan/docker/master/DockerHub/Dockerfile
-          wget -O v2ray.sh https://raw.githubusercontent.com/charlieethan/docker/master/DockerHub/v2ray.sh
+          wget -O Dockerfile https://raw.githubusercontent.com/v2fly/docker/master/DockerHub/Dockerfile
+          wget -O v2ray.sh https://raw.githubusercontent.com/v2fly/docker/master/DockerHub/v2ray.sh
           chmod +x v2ray.sh && bash v2ray.sh
 
       - name: Set up QEMU
@@ -43,14 +43,14 @@ jobs:
         run: |
           docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
           --output "type=image,push=true" \
-          --tag "${{ secrets.DOCKER_USERNAME }}/test:latest" \
+          --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:latest" \
           --file Dockerfile .
        
       - name: Build tag
         run: |
           docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
           --output "type=image,push=true" \
-          --tag "${{ secrets.DOCKER_USERNAME }}/test:${{ env.TAG }}" \
+          --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:${{ env.TAG }}" \
           --file Dockerfile .
 
   test:
@@ -64,5 +64,5 @@ jobs:
 
       - name: Test Docker image
         run: |
-          docker run --rm --entrypoint /usr/bin/v2ray ${{ secrets.DOCKER_USERNAME }}/test:latest -version
-          docker run --rm --entrypoint /usr/bin/v2ray ${{ secrets.DOCKER_USERNAME }}/test:${{ env.TAG }} -version
+          docker run --rm --entrypoint /usr/bin/v2ray ${{ secrets.DOCKER_USERNAME }}/v2fly-core:latest -version
+          docker run --rm --entrypoint /usr/bin/v2ray ${{ secrets.DOCKER_USERNAME }}/v2fly-core:${{ env.TAG }} -version
