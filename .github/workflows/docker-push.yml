@@ -14,8 +14,7 @@ jobs:
       
       - name: Set env
         run: |
-          echo "WORKDIR=$(dirname $GITHUB_WORKSPACE)" >> $GITHUB_ENV
-          echo "TAG=$(wget -qO- https://raw.githubusercontent.com/v2fly/docker/master/ReleaseTag | head -n1)" >> $GITHUB_ENV
+          echo "TAG=$(cat ReleaseTag | head -n1)" >> $GITHUB_ENV
         shell: bash
 
       - name: Install Golang
@@ -25,9 +24,10 @@ jobs:
           
       - name: Build Target
         run: |
-          cp ${WORKDIR}/docker/DockerHub/* ${PWD}
+          cp ReleaseTag DockerHub
+          cd DockerHub
           chmod +x v2ray.sh
-          bash v2ray.sh
+          ./v2ray.sh
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -43,6 +43,7 @@ jobs:
 
       - name: Build latest
         run: |
+          cd DockerHub
           docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
           --output "type=image,push=true" \
           --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:latest" \
@@ -50,6 +51,7 @@ jobs:
        
       - name: Build tag
         run: |
+          cd DockerHub
           docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
           --output "type=image,push=true" \
           --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:${{ env.TAG }}" \
@@ -60,9 +62,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Set env
         run: |
-          echo "TAG=$(wget -qO- https://raw.githubusercontent.com/v2fly/docker/master/ReleaseTag | head -n1)" >> $GITHUB_ENV
+          echo "TAG=$(cat ReleaseTag | head -n1)" >> $GITHUB_ENV
         shell: bash
 
       - name: Test Docker image
