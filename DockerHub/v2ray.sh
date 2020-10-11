@@ -50,8 +50,8 @@ fi
 echo "Download binary file: ${V2RAY_FILE} ${DGST_FILE} completed"
 
 # Check MD5
-LOCAL=$(openssl dgst -md5 v2ray.zip | sed 's/([^)]*)//g')
-STR=$(cat v2ray.zip.dgst | grep 'MD5' | head -n1)
+LOCAL=$(openssl dgst -sha512 v2ray.zip | sed 's/([^)]*)//g')
+STR=$(cat v2ray.zip.dgst | grep 'SHA512' | head -n1)
 
 if [ "${LOCAL}" = "${STR}" ]; then
     echo " Check passed" && rm -fv v2ray.zip.dgst
