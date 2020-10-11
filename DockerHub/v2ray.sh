@@ -36,16 +36,30 @@ fi
 
 # Download files
 V2RAY_FILE="v2ray-linux-${ARCH}.zip"
+DGST_FILE="v2ray-linux-${ARCH}.zip.dgst"
 echo "Downloading binary file: ${V2RAY_FILE}"
+echo "Downloading binary file: ${DGST_FILE}"
 
 TAG=$(wget -qO- https://raw.githubusercontent.com/v2fly/docker/master/ReleaseTag | head -n1)
 wget -O ${PWD}/v2ray.zip https://github.com/v2fly/v2ray-core/releases/download/${TAG}/${V2RAY_FILE} > /dev/null 2>&1
+wget -O ${PWD}/v2ray.zip.dgst https://github.com/v2fly/v2ray-core/releases/download/${TAG}/${DGST_FILE} > /dev/null 2>&1
 
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to download binary file: ${V2RAY_FILE}" && exit 1
+    echo "Error: Failed to download binary file: ${V2RAY_FILE} ${DGST_FILE}" && exit 1
 fi
-echo "Download binary file: ${V2RAY_FILE} completed"
+echo "Download binary file: ${V2RAY_FILE} ${DGST_FILE} completed"
 
+# Check MD5
+LOCAL=$(openssl dgst -md5 v2ray.zip | sed 's/([^)]*)//g')
+STR=$(cat v2ray.zip.dgst | grep 'MD5' | head -n1)
+
+if [ "${LOCAL}" = "${STR}" ]; then
+    echo " Check passed" && rm -fv v2ray.zip.dgst
+else
+    echo " Check have not passed yet " && exit 1
+fi
+
+# Prepare
 echo "Prepare to use"
 unzip v2ray.zip && chmod +x v2ray v2ctl
 mv v2ray /usr/bin/v2ray && mv v2ctl /usr/bin/v2ctl
