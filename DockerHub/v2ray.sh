@@ -49,7 +49,7 @@ if [ $? -ne 0 ]; then
 fi
 echo "Download binary file: ${V2RAY_FILE} ${DGST_FILE} completed"
 
-# Check MD5
+# Check SHA512
 LOCAL=$(openssl dgst -sha512 v2ray.zip | sed 's/([^)]*)//g')
 STR=$(cat v2ray.zip.dgst | grep 'SHA512' | head -n1)
 
@@ -62,8 +62,7 @@ fi
 # Prepare
 echo "Prepare to use"
 unzip v2ray.zip && chmod +x v2ray v2ctl
-mv v2ray /usr/bin/v2ray && mv v2ctl /usr/bin/v2ctl
-mv geoip.dat /usr/bin/geoip.dat && mv geosite.dat /usr/bin/geosite.dat
+mv v2ray v2ctl geoip.dat geosite.dat /usr/local/v2ray/
 mv config.json /etc/v2ray/config.json
 
 # Clean
