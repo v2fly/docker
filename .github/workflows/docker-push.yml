@@ -24,8 +24,6 @@ jobs:
           
       - name: Build Target
         run: |
-          cp ReleaseTag DockerHub
-          cd DockerHub
           chmod +x v2ray.sh
           ./v2ray.sh
 
@@ -43,19 +41,17 @@ jobs:
 
       - name: Build latest
         run: |
-          cd DockerHub
           docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
           --output "type=image,push=true" \
           --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:latest" \
-          --file Dockerfile.multi .
+          --file Dockerfile .
        
       - name: Build tag
         run: |
-          cd DockerHub
           docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
           --output "type=image,push=true" \
           --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:${{ env.TAG }}" \
-          --file Dockerfile.multi .
+          --file Dockerfile .
 
   test:
     needs: build

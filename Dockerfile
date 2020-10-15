@@ -1,22 +1,20 @@
-############################
-# STEP 1 build executable binary
-############################
-FROM golang:alpine AS builder
-RUN apk update && apk add --no-cache git bash wget curl
-WORKDIR /go/src/v2ray.com/core
-RUN git clone --progress https://github.com/v2fly/v2ray-core.git . && \
-    bash ./release/user-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly abpathtgz=/tmp/v2ray.tgz
-############################
-# STEP 2 build a small image
-############################
-FROM alpine
+FROM alpine:latest
+LABEL maintainer "V2Fly Community <dev@v2fly.org>"
 
-LABEL maintainer "V2Fly Community <vcptr@v2fly.org>"
-COPY --from=builder /tmp/v2ray.tgz /tmp
-RUN apk update && apk add ca-certificates && \
-    mkdir -p /usr/bin/v2ray && \
-    tar xvfz /tmp/v2ray.tgz -C /usr/bin/v2ray
+WORKDIR /root
+ARG TARGETVARIANT
+ARG TARGETARCH
+COPY v2ray-${TARGETARCH}${TARGETVARIANT}.tar.gz /usr/bin/v2ray.tar.gz
+RUN mkdir -p /usr/local/share/v2ray
+COPY geoip.dat /usr/local/share/v2ray/geoip.dat
+COPY geosite.dat /usr/local/share/v2ray/geosite.dat
+COPY config.json /etc/v2ray/config.json
 
-#ENTRYPOINT ["/usr/bin/v2ray/v2ray"]
-ENV PATH /usr/bin/v2ray:$PATH
-CMD ["v2ray", "-config=/etc/v2ray/config.json"]
+RUN set -ex \
+	&& apk add --no-cache tzdata ca-certificates \
+	&& mkdir -p /etc/v2ray/ /var/log/v2ray \
+	&& tar -zxvf /usr/bin/v2ray.tar.gz -C /usr/bin \
+	&& rm -fv /usr/bin/v2ray.tar.gz
+
+VOLUME /etc/v2ray
+CMD [ "/usr/bin/v2ray", "-config", "/etc/v2ray/config.json" ]
