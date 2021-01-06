@@ -2,6 +2,9 @@ on:
   push:
     paths:
       - "ReleaseTag"
+      - "v2ray.sh"
+      - "Dockerfile"
+      - ".github/workflows/docker-push.yml"
 
 name: docker push
 jobs:
@@ -31,14 +34,14 @@ jobs:
 
       - name: Build latest
         run: |
-          docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
+          docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 \
           --output "type=image,push=true" \
           --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:latest" \
           --file Dockerfile .
        
       - name: Build tag
         run: |
-          docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
+          docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 \
           --output "type=image,push=true" \
           --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:${{ env.TAG }}" \
           --file Dockerfile .
