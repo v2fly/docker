@@ -21,12 +21,6 @@ else
         linux/arm64|linux/arm64/v8)
             ARCH="arm64-v8a"
             ;;
-        linux/ppc64le)
-            ARCH="ppc64le"
-            ;;
-        linux/s390x)
-            ARCH="s390x"
-            ;;
         *)
             ARCH=""
             ;;
