@@ -19,9 +19,6 @@ name: docker push
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      docker_image: ${{ steps.prepare.outputs.docker_image }}
-      docker_tag: ${{ steps.prepare.outputs.docker_tag }}
     steps:
       - name: Checkout codebase
         uses: actions/checkout@v2
@@ -71,15 +68,3 @@ jobs:
           --tag "${{ steps.prepare.outputs.docker_image }}:latest" \
           --build-arg TAG=${{ steps.prepare.outputs.docker_tag }} \
           --file Dockerfile .
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Test Docker image
-        run: |
-          docker run --rm --entrypoint /usr/bin/v2ray ${{ needs.build.outputs.docker_image }}:latest -version
-          docker run --rm --entrypoint /usr/bin/v2ray ${{ needs.build.outputs.docker_image }}:${{ needs.build.outputs.docker_tag }} -version
