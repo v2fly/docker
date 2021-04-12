@@ -1,7 +1,16 @@
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The tag version you want to build"
   push:
     paths:
-      - "ReleaseTag"
+      - "v2ray.sh"
+      - "Dockerfile"
+      - ".github/workflows/docker-push.yml"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
       - "v2ray.sh"
       - "Dockerfile"
       - ".github/workflows/docker-push.yml"
@@ -10,55 +19,67 @@ name: docker push
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      docker_image: ${{ steps.prepare.outputs.docker_image }}
+      docker_tag: ${{ steps.prepare.outputs.docker_tag }}
     steps:
-
-      - name: Checkout
+      - name: Checkout codebase
         uses: actions/checkout@v2
-      
-      - name: Set env
-        run: |
-          echo "TAG=$(cat ReleaseTag | head -n1)" >> $GITHUB_ENV
-        shell: bash
 
-      - name: Set up QEMU
+      - name: Setup QEMU
         uses: docker/setup-qemu-action@v1
 
-      - name: Set up Docker Buildx
+      - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      
+
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build latest
+      - name: Get tag to build
+        id: tag
         run: |
-          docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 \
-          --output "type=image,push=true" \
-          --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:latest" \
-          --file Dockerfile .
-       
-      - name: Build tag
+          latest_tag=$(curl -sSL --retry 5 "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" | grep "tag_name" | awk -F '"' '{print $4}')
+          if [[ -z "${{ github.event.inputs.tag }}" ]]; then
+            echo "Use the latest release tag of v2ray-core: ${latest_tag}"
+            echo ::set-output name=tag::${latest_tag}
+          else
+            echo "Use tag: ${{ github.event.inputs.tag }}"
+            echo ::set-output name=tag::${{ github.event.inputs.tag }}
+          fi
+
+      - name: Determine whether to push to DockerHub
+        if: github.event_name == 'workflow_dispatch'
         run: |
-          docker buildx build --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 \
-          --output "type=image,push=true" \
-          --tag "${{ secrets.DOCKER_USERNAME }}/v2fly-core:${{ env.TAG }}" \
+          echo "PUSH=true" >> $GITHUB_ENV
+
+      - name: Prepare environment variables
+        id: prepare
+        run: |
+          echo ::set-output name=docker_platforms::linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          echo ::set-output name=docker_image::v2fly/v2fly-core
+          echo ::set-output name=docker_tag::${{ steps.tag.outputs.tag }}
+          echo ::set-output name=docker_is_push::${PUSH:-false}
+
+      - name: Build tag & latest release
+        run: |
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platforms }} \
+          --output "type=image,push=${{ steps.prepare.outputs.docker_is_push }}" \
+          --tag "${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.docker_tag }}" \
+          --tag "${{ steps.prepare.outputs.docker_image }}:latest" \
+          --build-arg TAG=${{ steps.prepare.outputs.docker_tag }} \
           --file Dockerfile .
+
   test:
     needs: build
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set env
-        run: |
-          echo "TAG=$(cat ReleaseTag | head -n1)" >> $GITHUB_ENV
-        shell: bash
-
       - name: Test Docker image
         run: |
-          docker run --rm --entrypoint /usr/bin/v2ray ${{ secrets.DOCKER_USERNAME }}/v2fly-core:latest -version
-          docker run --rm --entrypoint /usr/bin/v2ray ${{ secrets.DOCKER_USERNAME }}/v2fly-core:${{ env.TAG }} -version
+          docker run --rm --entrypoint /usr/bin/v2ray ${{ needs.build.outputs.docker_image }}:latest -version
+          docker run --rm --entrypoint /usr/bin/v2ray ${{ needs.build.outputs.docker_image }}:${{ needs.build.outputs.docker_tag }} -version
