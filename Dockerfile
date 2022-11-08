@@ -1,5 +1,5 @@
 FROM --platform=${TARGETPLATFORM} alpine:latest
-LABEL maintainer "V2Fly Community <dev@v2fly.org>"
+LABEL maintainer="V2Fly Community <dev@v2fly.org>"
 
 WORKDIR /root
 ARG TARGETPLATFORM
@@ -12,4 +12,4 @@ RUN set -ex \
 	&& chmod +x /root/v2ray.sh \
 	&& /root/v2ray.sh "${TARGETPLATFORM}" "${TAG}"
 
-CMD [ "/usr/bin/v2ray", "run", "-c", "/etc/v2ray/config.json" ]
+ENTRYPOINT ["/usr/bin/v2ray"]
