@@ -7,13 +7,13 @@ ARG TAG
 COPY v2ray.sh /root/v2ray.sh
 COPY v4-forward.conf /etc/sysctl.d/v4-forward.conf
 COPY rules.v4 /etc/iptables/rules.v4
-COPY entrypoint.sh /opt/entrypoint.sh
+COPY tproxy.sh /usr/bin/v2ray-tproxy
 
 RUN set -ex \
 	&& apk add --no-cache tzdata openssl ca-certificates iptables \
 	&& mkdir -p /etc/v2ray /usr/local/share/v2ray /var/log/v2ray \
 	&& chmod +x /root/v2ray.sh \
-    && chmod +x /opt/entrypoint.sh \
+    && chmod +x /usr/bin/v2ray-tproxy \
 	&& /root/v2ray.sh "${TARGETPLATFORM}" "${TAG}"
 
-ENTRYPOINT ["/opt/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/v2ray"]
