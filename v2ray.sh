@@ -44,12 +44,14 @@ fi
 echo "Download binary file: ${V2RAY_FILE} ${DGST_FILE} completed"
 
 # Check SHA512
-LOCAL=$(openssl dgst -sha512 v2ray.zip | sed 's/([^)]*)//g')
-STR=$(cat v2ray.zip.dgst | grep 'SHA512' | head -n1)
+V2RAY_ZIP_HASH=$(openssl dgst -sha512 v2ray.zip | sed 's/([^)]*)//g')
+V2RAY_ZIP_DGST_HASH=$(cat v2ray.zip.dgst | grep 'SHA512' | head -n1)
 
-if [ "${LOCAL}" = "${STR}" ]; then
+if [ "${V2RAY_ZIP_HASH}" = "${V2RAY_ZIP_DGST_HASH}" ]; then
     echo " Check passed" && rm -fv v2ray.zip.dgst
 else
+    echo "V2RAY_ZIP_HASH: ${V2RAY_ZIP_HASH}"
+    echo "V2RAY_ZIP_DGST_HASH: ${V2RAY_ZIP_DGST_HASH}"
     echo " Check have not passed yet " && exit 1
 fi
 
