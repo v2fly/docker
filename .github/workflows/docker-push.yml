@@ -21,16 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout codebase
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -41,10 +41,10 @@ jobs:
           latest_tag=$(curl -sSL --retry 5 "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" | jq .tag_name | awk -F '"' '{print $2}')
           if [[ -z "${{ github.event.inputs.tag }}" ]]; then
             echo "Use the latest release tag of v2ray-core: ${latest_tag}"
-            echo ::set-output name=tag::${latest_tag}
+            echo "tag=${latest_tag}" >> $GITHUB_OUTPUT
           else
             echo "Use tag: ${{ github.event.inputs.tag }}"
-            echo ::set-output name=tag::${{ github.event.inputs.tag }}
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Determine whether to push to DockerHub
@@ -55,10 +55,10 @@ jobs:
       - name: Prepare environment variables
         id: prepare
         run: |
-          echo ::set-output name=docker_platforms::linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-          echo ::set-output name=docker_image::v2fly/v2fly-core
-          echo ::set-output name=docker_tag::${{ steps.tag.outputs.tag }}
-          echo ::set-output name=docker_is_push::${PUSH:-false}
+          echo "docker_platforms=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64" >> $GITHUB_OUTPUT
+          echo "docker_image=v2fly/v2fly-core" >> $GITHUB_OUTPUT
+          echo "docker_tag=${{ steps.tag.outputs.tag }}" >> $GITHUB_OUTPUT
+          echo "docker_is_push=${PUSH:-false}" >> $GITHUB_OUTPUT
 
       - name: Build tag & latest release
         run: |
