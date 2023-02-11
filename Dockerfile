@@ -1,6 +1,8 @@
 FROM --platform=${TARGETPLATFORM} alpine:latest
 LABEL maintainer="V2Fly Community <dev@v2fly.org>"
 
+RUN apk add iptables
+
 WORKDIR /root
 ARG TARGETPLATFORM
 ARG TAG
