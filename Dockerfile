@@ -20,4 +20,8 @@ RUN set -ex \
 COPY entrypoint.sh /root/entrypoint.sh
 RUN chmod +x /root/entrypoint.sh
 
+ENV TPROXY false
+ENV DOKODEMO_DOOR_PORT 12345
+ENV BYPASS_SUBNETS ""
+
 ENTRYPOINT ["/root/entrypoint.sh"]
