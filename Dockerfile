@@ -15,4 +15,7 @@ RUN set -ex \
     && chmod +x /root/v2ray.sh \
     && /root/v2ray.sh "${TARGETPLATFORM}" "${TAG}"
 
-ENTRYPOINT ["/usr/bin/v2ray"]
+COPY entrypoint.sh /root/entrypoint.sh
+RUN chmod +x /root/entrypoint.sh
+
+ENTRYPOINT ["/root/entrypoint.sh"]
