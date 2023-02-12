@@ -1,6 +1,8 @@
 FROM --platform=${TARGETPLATFORM} alpine:latest
 LABEL maintainer="V2Fly Community <dev@v2fly.org>"
 
+RUN apk add iptables
+
 WORKDIR /root
 ARG TARGETPLATFORM
 ARG TAG
@@ -15,4 +17,11 @@ RUN set -ex \
     && chmod +x /root/v2ray.sh \
     && /root/v2ray.sh "${TARGETPLATFORM}" "${TAG}"
 
-ENTRYPOINT ["/usr/bin/v2ray"]
+COPY entrypoint.sh /root/entrypoint.sh
+RUN chmod +x /root/entrypoint.sh
+
+ENV TPROXY false
+ENV DOKODEMO_DOOR_PORT 12345
+ENV BYPASS_SUBNETS ""
+
+ENTRYPOINT ["/root/entrypoint.sh"]

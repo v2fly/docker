@@ -6,12 +6,14 @@ on:
   push:
     paths:
       - "v2ray.sh"
+      - "entrypoint.sh"
       - "Dockerfile"
       - ".github/workflows/docker-push.yml"
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
       - "v2ray.sh"
+      - "entrypoint.sh"
       - "Dockerfile"
       - ".github/workflows/docker-push.yml"
 
