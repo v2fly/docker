@@ -14,6 +14,7 @@ on:
       - "v2ray.sh"
       - "Dockerfile"
       - ".github/workflows/docker-push.yml"
+  workflow_call:
 
 name: docker push
 jobs:
@@ -38,7 +39,7 @@ jobs:
       - name: Get tag to build
         id: tag
         run: |
-          latest_tag=$(curl -sSL --retry 5 "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" | jq .tag_name | awk -F '"' '{print $2}')
+          latest_tag=$(curl -sSL --retry 5 "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" | jq -r ".tag_name")
           if [[ -z "${{ github.event.inputs.tag }}" ]]; then
             echo "Use the latest release tag of v2ray-core: ${latest_tag}"
             echo "tag=${latest_tag}" >> $GITHUB_OUTPUT

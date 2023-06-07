@@ -1,0 +1,26 @@
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 10 * * *"
+  
+name: auto build docker image
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    outputs:
+      ret: ${{ steps.version-check-result.outputs.ret }}
+    steps:
+      - name: Compare Docker image version with v2fly release's
+        id: version-check-result
+        run: |
+          v2fly_release=$(curl -sSL --retry 5 https://api.github.com/repos/v2fly/v2ray-core/releases/latest | jq -r ".tag_name")
+          docker_tag=$(curl -sSL --retry 5 https://hub.docker.com/v2/repositories/v2fly/v2fly-core/tags | jq -r ".results[1].name")
+          ret=1
+          if [[ $v2fly_release != $docker_tag ]] && [[ $(printf '%s\n' $v2fly_release $docker_tag | sort -V | head -n1) == $docker_tag ]]; then ret=0; fi
+          echo "ret=$ret" >> $GITHUB_OUTPUT
+    
+  trigger-build:
+    needs: version-check
+    if: ${{ needs.version-check.outputs.ret == '0'}}
+    uses: ./.github/workflows/docker-push.yml
+    secrets: inherit
