@@ -19,7 +19,7 @@ docker run -d --name v2ray -v /path/to/config.json:/etc/v2ray/config.json -p 100
 
 ## 使用TPROXY透明代理的额外说明
 
--  需要添加容器启动参数 `--privileged` 使用特权模式启动  
+  - 需要添加容器启动参数 `--privileged` 使用特权模式启动  
 -  使用容器macvlan功能，为容器分配一个独占的主网络IP地址  
 -  macvlan默认不支持dns，启动容器时挂载宿主机 `-v /etc/resolv.conf:/etc/resolv.conf` 文件保证容器内域名可以正常解析  
 -  为宿主机的主网卡开启混杂模式  
