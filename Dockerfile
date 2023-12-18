@@ -10,7 +10,7 @@ COPY rules.v4 /etc/iptables/rules.v4
 COPY tproxy.sh /usr/bin/v2ray-tproxy
 
 RUN set -ex \
-    && apk add --no-cache ca-certificates iptables \
+    && apk add --no-cache ca-certificates curl iptables \
     && mkdir -p /etc/v2ray /usr/local/share/v2ray /var/log/v2ray \
     # forward request and error logs to docker log collector
     && ln -sf /dev/stdout /var/log/v2ray/access.log \
